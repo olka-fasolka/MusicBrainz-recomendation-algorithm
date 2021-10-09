@@ -2,17 +2,23 @@ import os
 from mutagen.id3 import ID3
 import requests
 from services.AcousticBrainzService import AcousticBrainzService
+from tqdm import tqdm
 
 class FileManager: 
 
-    def upload_songs_to_dataset(self, dataset_ID, directory): 
+    def upload_songs_to_dataset(self, dataset_ID): 
         ABS = AcousticBrainzService()
-        for filename in os.listdir(directory): 
-            filepath = directory + "/" + filename
-            recording_ID = self.read_UUID(filepath)
-            ABS.add_recording_to_dataset(recording_ID, dataset_ID, "songs")
-            print(recording_ID)
 
+        thisdir = os.getcwd()
+
+        for r, d, f in tqdm(os.walk(thisdir)): 
+            for file in f: 
+                if file.endswith(".mp3"): 
+                    filepath=os.path.join(r,file)
+                    recording_ID = self.read_UUID(filepath)
+                    ABS.add_recording_to_dataset(recording_ID, dataset_ID, "all")
+                    print("uploaded: ",recording_ID)
+            
 
     
     def read_UUID(self, filepath): 
